@@ -1,0 +1,324 @@
+<mat-toolbar class="component--dialog-box__custom-toolbar">
+  <span class="text-sm font-[550]"></span>
+  <span class="example-spacer">Add New</span>
+  <button mat-dialog-button class="flex items-center justify-center" (click)="onNoClick()">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+<section class="py-0 flex flex-col overflow-hidden" mat-dialog-content>
+  <div>
+    <form [formGroup]="form">
+      <div class="p-2">
+        <p class="normal-heading">
+          Select from the list of our Global Course / Subject of your interest:
+        </p>
+        <div class="gt-xs:flex">
+          <div>
+            <!-- <p class="mt-5 normal-heading">Please Select Country:</p> -->
+          </div>
+          <div>
+            <mat-form-field
+              appearance="outline"
+              class="w-full mt-3 lt-sm:w-[98%] sm:w-[182%] sm:-ml-[4px] gt-sm:w-[182%] component--mat-form-field__custom-input component--mat-country_input__custom-style"
+            >
+              <mat-label class="normal-heading">Please Select Country:</mat-label>
+              <mat-select formControlName="country" name="item">
+                <mat-option
+                  (click)="getval()"
+                  *ngFor="let item of country_select"
+                  [value]="item.shortName"
+                >
+                  {{ item.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+    
+        <!-- Tree -->
+        <div class="mt-4">
+          <mat-tree
+            #tree
+            [dataSource]="nestedDataSource"
+            [treeControl]="nestedTreeControl"
+            class="example-tree mat-tree-position"
+          >
+            <!-- Without Children -->
+            <mat-tree-node *matTreeNodeDef="let node">
+              <li class="mat-tree-node">
+                <mat-radio-button
+                  class="checklist-leaf-node ml-4"
+                  (change)="$event ? todoLeafItemSelectionToggle(node) : null"
+                  (change)="get_tree_view_name($event)"
+                  [value]="node"
+                  ><span class="txtColor">
+                    {{ node.educational_institution_category_name }}
+                  </span></mat-radio-button
+                >
+              </li>
+            </mat-tree-node>
+    
+            <!-- With Children -->
+            <mat-nested-tree-node *matTreeNodeDef="let node; when: hasNestedChild">
+              <li>
+                <div class="mat-tree-node">
+                  <button
+                    mat-icon-button
+                    matTreeNodeToggle
+                    [attr.aria-label]="'toggle ' + node.Name"
+                  >
+                    <mat-icon class="mat-icon-rtl-mirror">
+                      {{
+                        nestedTreeControl.isExpanded(node)
+                          ? "expand_more"
+                          : "chevron_right"
+                      }}
+                    </mat-icon>
+                  </button>
+                  {{ node.educational_institution_category_name }}
+                </div>
+                <ul
+                  [class.example-tree-invisible]="
+                    !nestedTreeControl.isExpanded(node)
+                  "
+                >
+                  <ng-container matTreeNodeOutlet></ng-container>
+                </ul>
+              </li>
+            </mat-nested-tree-node>
+          </mat-tree>
+        </div>
+      </div>
+    </form>
+    
+    <!-- //// move -->
+    
+    <div class="p-2">
+      <div>
+        <span class="normal-heading"
+          >Please Select the Relevant Courses / Subjects to the above selected
+          syllabus:
+          <span class="red-heading">
+            {{ country }} / {{ educational_institution_category_name }}</span
+          ></span
+        >
+      </div>
+    
+      <div class="mt-4">
+        <div class="mat-elevation-z8 example-container w-fit">
+          <div id="pdfTable11">
+            <table
+              *ngIf="dataSource"
+              id="excel_table"
+              mat-table
+              [dataSource]="dataSource"
+              class="component--mat-table__custom-table checklist-table table-bordered table-sm block"
+            >
+              <ng-container matColumnDef="GlobalCourseSubjectName">
+                <th
+                  mat-header-cell
+                  *matHeaderCellDef
+                  style="
+                    word-wrap: break-word;
+                    min-width: 160px;
+                    padding-right: 8px;
+                    padding-left: 8px;
+                    text-align: center;
+                    vertical-align: middle;
+                    margin-top: 8px;
+                    margin-bottom: 8px;
+                  "
+                >
+                <!-- <mat-checkbox (change)="$event ? masterToggle() : null"
+                [checked]="selection.hasValue()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()">
+                </mat-checkbox> -->
+                  Global Course / <br />Subject Name
+                </th>
+                <td mat-cell *matCellDef="let element" style="text-align: left">
+                  <mat-checkbox
+                    (click)="$event.stopPropagation()"
+                    (change)="$event ? selection.toggle(element) : null"
+                    [checked]="selection.isSelected(element)"
+                    (change)="selectRow()"
+                  >
+                  </mat-checkbox>
+                  {{ element.course_subject_name }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="CourseSubjectCategoryType">
+                <th
+                  mat-header-cell
+                  *matHeaderCellDef
+                  style="
+                    word-wrap: break-word;
+                    min-width: 180px;
+                    padding-right: 8px;
+                    padding-left: 8px;
+                    text-align: center;
+                    vertical-align: middle;
+                  "
+                  class="whitespace-nowrap"
+                >
+                  Course / Subject - <br />
+                  Category / Type
+                </th>
+                <td
+                  mat-cell
+                  *matCellDef="let element"
+                  style="text-align: left; padding-right: 8px; padding-left: 8px"
+                >
+                  <span>{{ element.course_subject_type }}</span>
+                </td>
+              </ng-container>
+              <tr
+                mat-header-row
+                *matHeaderRowDef="displayedColumns; sticky: true"
+              ></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              <tr class="mat-row" *matNoDataRow style="text-align: center;">
+                <td class="mat-cell" colspan="2">Data not found</td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <mat-paginator
+              class="component--mat-pagination__size"
+              #paginator
+              #paginatorElement
+              [length]="dataSource.data.length"
+              [pageIndex]="0"
+              [pageSizeOptions]="[5, 10, 20]"
+              [pageSize]="5"
+              [allValue]="dataSource.data.length"
+              appAddAllToPaginator
+              (page)="pageChanged($event)" 
+              [allValue]="dataSource.data.length"
+            >
+            </mat-paginator>
+          </div>
+          <span class="normal-heading" style="font-size: 12px; font-weight: 400; margin-left: 4px;">
+            <span class="red-heading" style="font-size: 12px;">*</span> Select "All" Records in order to enable
+            filter</span>
+          <div class="flex bg-white-black">
+            <div class="custom-mat-floating-label">
+              <mat-form-field
+                appearance="outline"
+                class="component--mat-form-field__custom-input pl-2"
+              >
+                <!-- <mat-label>Filter</mat-label> -->
+                <input
+                  matInput
+                  (keyup)="applyFilter($event)"
+                  #input
+                  placeholder="Filter" 
+                  [disabled]="filterDisable"
+                />
+              </mat-form-field>
+            </div>
+            <div class="w-full flex justify-end">
+              <span class="p-5 export-btn" [matMenuTriggerFor]="menu">Export</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div style="text-align: end; margin-right: 10px; margin-top: 15px">
+        <button
+          mat-raised-button
+          class="primary-button"
+          (click)="submit()"
+          [disabled]="btn_disable == false"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- <div class="mt-2">
+  <app-next-add-edit-syllabus-of-your-interest
+    [educational_institution_category_name]="educational_institution_category_name" [category]="category"
+    [country_code]="country_code" [country]="country"></app-next-add-edit-syllabus-of-your-interest>
+</div> -->
+<mat-menu #menu="matMenu">
+  <button mat-menu-item (click)="downloadAsPDF()">
+    <mat-icon>picture_as_pdf</mat-icon>
+    <span>Print / Export PDF</span>
+  </button>
+  <button
+    mat-menu-item
+    (click)="exportReport('Your Educational Institution Syllabus.xlsx')"
+  >
+    <mat-icon>grid_on</mat-icon>
+    <span>Export SpreadSheet</span>
+  </button>
+  <button
+    mat-menu-item
+    (click)="exportReport('Your Educational Institution Syllabus.csv')"
+  >
+    <mat-icon>grid_on</mat-icon>
+    <span>Export csv File</span>
+  </button>
+  <button
+    mat-menu-item
+    (click)="exportReport('Your Educational Institution Syllabus.json')"
+  >
+    <mat-icon>grid_on</mat-icon>
+    <span>Export json</span>
+  </button>
+</mat-menu>
+
+<!-- <div class="mt-[15px]">
+  <div>
+  </div>
+  <div *ngIf="showTreeStructure">
+    <mat-tree #tree [dataSource]="nestedDataSource" [treeControl]="nestedTreeControl"
+      class="example-tree mat-tree-position" style="
+      border: 0.5px solid;
+      height: 250px;
+      overflow: auto;
+      border-radius: 5px;
+      ">
+      Without Children
+      <mat-tree-node *matTreeNodeDef="let node">
+        <li class="mat-tree-node" [ngStyle]="{
+          background:
+            checklistSelection.isSelected(node) === true
+            ? 'aliceblue'
+            : 'inherit'
+        }">
+
+          <mat-checkbox class="checklist-leaf-node" [checked]="checklistSelection.isSelected(node)"
+            (change)="todoLeafItemSelectionToggle(node)" style="left: 10px"><span class="txtColor">
+              {{ node.educational_institution_category_name }}
+            </span></mat-checkbox>
+
+        </li>
+      </mat-tree-node>
+
+      With Children
+      <mat-nested-tree-node *matTreeNodeDef="let node; when: hasNestedChild">
+        <li>
+          <div class="mat-tree-node">
+            <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'toggle ' + node.Name">
+              <mat-icon class="mat-icon-rtl-mirror">
+                {{
+                nestedTreeControl.isExpanded(node)
+                ? "expand_more"
+                : "chevron_right"
+                }}
+              </mat-icon>
+            </button>
+            {{ node.educational_institution_category_name }}
+          </div>
+          <ul [class.example-tree-invisible]="
+            !nestedTreeControl.isExpanded(node)
+          ">
+            <ng-container matTreeNodeOutlet></ng-container>
+          </ul>
+        </li>
+      </mat-nested-tree-node>
+    </mat-tree>
+  </div>
+</div> -->
